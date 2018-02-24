@@ -1,0 +1,16 @@
+# Bower dependency directory
+bower_components
+
+# Npm Dependency directories
+node_modules/
+
+# webpack's output directory
+dist/
+
+# dotenv environment variables file
+.env
+
+# some platform/IDE specific files
+.DS_STORE
+.idea
+*.iml
