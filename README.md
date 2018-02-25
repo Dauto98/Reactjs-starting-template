@@ -3,7 +3,7 @@
 
 This repo includes basic setup for Reactjs
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. Please note that this is not suitable for production yet
 
 ## Prerequisites
 
@@ -199,6 +199,7 @@ module.exports = {
 
 #### Create React app
 We will create a sample React app and serve it by webpack-dev-server
+
 Install dependencies
 
 ```
@@ -427,5 +428,7 @@ This config is depend on the host/platform you use, so the above code is just an
 ## Reference
 Some useful link
 [Predictable long term caching with Webpack](https://medium.com/webpack/predictable-long-term-caching-with-webpack-d3eee1d3fa31)
+
 [How commonschunkplugin work](https://stackoverflow.com/questions/39548175/can-someone-explain-webpacks-commonschunkplugin)
+
 [Getting the most out of the CommonsChunkPlugin()](https://medium.com/webpack/webpack-bits-getting-the-most-out-of-the-commonschunkplugin-ab389e5f318)
