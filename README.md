@@ -152,7 +152,7 @@ Add to the config file
 module.exports = {
 	......
 	devServer: {
-		contentBase : path.resolve(__dirname, 'dist'), //tell dev-server where to get your files
+		publicPath : '/', // this need to be the same as output.publicPath
 		host: 'localhost', // combine with port, will server your app through localhost:8080
 		port: 8080,
 		historyApiFallback: true
