@@ -427,6 +427,7 @@ This config is depend on the host/platform you use, so the above code is just an
 
 ## Reference
 Some useful link
+
 [Predictable long term caching with Webpack](https://medium.com/webpack/predictable-long-term-caching-with-webpack-d3eee1d3fa31)
 
 [How commonschunkplugin work](https://stackoverflow.com/questions/39548175/can-someone-explain-webpacks-commonschunkplugin)
