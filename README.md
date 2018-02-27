@@ -61,16 +61,16 @@ Create `webpack.config.js` file in your project root directory, add the followin
 const path = require('path');
 
 module.exports = {
-	context : path.resolve(__dirname),  //base directory, make webpack config independent from current working directory
-	entry : {
-		main : './src/index.js' //tell webpack where to start bundling your app
-	},
-	output : {
-		filename: '[name].[chunkhash].js', // the output file's name
-		path : path.resolve(__dirname, 'dist'), // where the file will be placed
-		publicPath : '/' //the path to access from the web
-	},
-	devtool : 'inline-source-map', // output source map, use to debug in browser devtools
+    context : path.resolve(__dirname),  //base directory, make webpack config independent from current working directory
+    entry : {
+        main : './src/index.js' //tell webpack where to start bundling your app
+    },
+    output : {
+        filename: '[name].[chunkhash].js', // the output file's name
+        path : path.resolve(__dirname, 'dist'), // where the file will be placed
+        publicPath : '/' //the path to access from the web
+    },
+    devtool : 'inline-source-map', // output source map, use to debug in browser devtools
 }
 ```
 
@@ -90,56 +90,56 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
-	....
-	module : {
-		rules : [
-	      {
-	        test: /\.css$/,
-	        use: ExtractTextPlugin.extract({
-	          fallback: 'style-loader',
-	          use: [
-	            {
-	              loader: 'css-loader',
-	              options: {
-	                modules: true, // turn css selectors into hashes
-	                importLoaders: 1, // 1 loader will be applied before css-loader
-	                camelCase: true,
-	                sourceMap: true
-	              }
-	            },
-	            {
-	              loader: 'postcss-loader',
-	              options: {
-	                config: {
-	                  ctx: {
-	                    autoprefixer: {
-	                      browsers: 'last 2 versions' //only support last 2 versions of browser
-	                    }
-	                  }
-	                }
-	              }
-	            }
-	          ]
-	        })
-	      }
-		]
-	},
-	plugins : [
-		new ExtractTextPlugin({
-			filename: 'styles/styles.[contenthash].css',
-			allChunks: true
-		}),
-		new HtmlWebpackPlugin({
-			template: `public/index.html`,
-			//favicon: `public/favicon.ico` // if you have one
-		}),
-	]
+    ....
+    module : {
+        rules : [
+          {
+            test: /\.css$/,
+            use: ExtractTextPlugin.extract({
+              fallback: 'style-loader',
+              use: [
+                {
+                  loader: 'css-loader',
+                  options: {
+                    modules: true, // turn css selectors into hashes
+                    importLoaders: 1, // 1 loader will be applied before css-loader
+                    camelCase: true,
+                    sourceMap: true
+                  }
+                },
+                {
+                  loader: 'postcss-loader',
+                  options: {
+                    config: {
+                      ctx: {
+                        autoprefixer: {
+                          browsers: 'last 2 versions' //only support last 2 versions of browser
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            })
+          }
+        ]
+    },
+    plugins : [
+        new ExtractTextPlugin({
+            filename: 'styles/styles.[contenthash].css',
+            allChunks: true
+        }),
+        new HtmlWebpackPlugin({
+            template: `public/index.html`,
+            //favicon: `public/favicon.ico` // if you have one
+        }),
+    ]
 }
 ```
 Create `postcss.config.js` file and add the following content
 ```
 module.exports = {
-  plugins: [require('autoprefixer')]
+    plugins: [require('autoprefixer')]
 };
 ```
 
@@ -150,13 +150,13 @@ npm install --save webpack-dev-server
 Add to the config file
 ```
 module.exports = {
-	......
-	devServer: {
-		publicPath : '/', // this need to be the same as output.publicPath
-		host: 'localhost', // combine with port, will server your app through localhost:8080
-		port: 8080,
-		historyApiFallback: true
-	}
+    ......
+    devServer: {
+        publicPath : '/', // this need to be the same as output.publicPath
+        host: 'localhost', // combine with port, will server your app through localhost:8080
+        port: 8080,
+        historyApiFallback: true
+    }
 }
 ```
 -------
@@ -175,23 +175,23 @@ Create `.babelrc` in your project root directory,  this is the babel configurati
 ```
 //.babelrc
 {
-	"presets": ["env", "react"]
+    "presets": ["env", "react"]
 }
 ```
 Add rule to `webpack.config.js` file
 ```
 module.exports = {
-	......
-	module : {
-		rules : [
-			{
-		        test: /\.(js)$/,
-		        exclude: /node_modules/,
-		        use: ['babel-loader']
-			},
-			.....
-		]
-	}
+    ......
+    module : {
+        rules : [
+            {
+                test: /\.(js)$/,
+                exclude: /node_modules/,
+                use: ['babel-loader']
+            },
+            .....
+        ]
+    }
 }
 ```
 
@@ -222,19 +222,19 @@ This is the current files structure
 ```
 Let create files and folders so it looks like this, the dist folder will be created when we run webpack
 ```
-|--assets 							// folder containing images, gif and stuff
+|--assets                 // folder containing images, gif and stuff
 |--node_modules
-|--public 							// folder containing HTML, favicon
-	|--index.html 				// base html file
-|--src 									// folder containing JS and CSS file
-	|--components 				// folder containing React components
-		|--app 							// the app component folder
-			|--app.css
-			|--app.js
-		|--home 						// the home component folder
-			|--home.css
-			|--home.js
-	|--index.js 					// base JS file
+|--public                 // folder containing HTML, favicon
+    |--index.html         // base html file
+|--src                    // folder containing JS and CSS file
+    |--components         // folder containing React components
+        |--app            // the app component folder
+            |--app.css
+            |--app.js
+        |--home           // the home component folder
+            |--home.css
+            |--home.js
+    |--index.js           // base JS file
 |--.babelrc
 |--.gitignore
 |--package-lock.json
@@ -246,20 +246,18 @@ In the `index.html`, add the following
 ```
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>React-starting-template</title>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>React-starting-template</title>
 
-	  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.min.css"></link>
-	</head>
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.min.css"></link>
+    </head>
 
-	<body>
-	  <div id="root"></div>
-	</body>
+    <body>
+      <div id="root"></div>
+    </body>
 </html>
-
-
 ```
 In the `index.js`, add the following
 ```
@@ -280,17 +278,17 @@ import Home from '../home/home.js';
 
 const App = () => {
   return (
-		<BrowserRouter>
-			<div>
-				<nav>
-					<Link to='/'>Home</Link>
-				</nav>
-				<Divider />
-				<Switch>
-					<Route exact path="/" component={Home} />
-				</Switch>
-			</div>
-		</BrowserRouter>
+        <BrowserRouter>
+            <div>
+                <nav>
+                    <Link to='/'>Home</Link>
+                </nav>
+                <Divider />
+                <Switch>
+                    <Route exact path="/" component={Home} />
+                </Switch>
+            </div>
+        </BrowserRouter>
   );
 };
 
@@ -306,11 +304,11 @@ import { Header } from 'semantic-ui-react';
 import { h1 } from './home.css';
 
 const Home = () => {
-	return (
-		<Header as="h1" className={h1}>
-			Hello world
-		</Header>
-	)
+    return (
+        <Header as="h1" className={h1}>
+            Hello world
+        </Header>
+    )
 }
 
 export default Home;
@@ -318,7 +316,7 @@ export default Home;
 In `home.css`
 ```
 .h1 {
-	font-weight: 400;
+    font-weight: 400;
 }
 ```
 Now, run this in your terminal (cd to your project root directory) 
@@ -341,13 +339,13 @@ Add this to your `webpack.config.js`
 const webpack = require('webpack');
 
 module.exports = {
-	.....
-	plugins : [
-		....
-		new webpack.optimize.CommonsChunkPlugin({
-			names : ['vendor', 'runtime']
-		})
-	]
+    .....
+    plugins : [
+        ....
+        new webpack.optimize.CommonsChunkPlugin({
+            names : ['vendor', 'runtime']
+        })
+    ]
 }
 ```
 The vendor will contain module shared between chunks and runtime contains webpack runtime code
@@ -364,22 +362,22 @@ npm install --save responsive-loader sharp
 In `webpack.config.js`
 ```
 module.exports = {
-	......
-	module : {
-		rules : [
-			.....
-			{
-				test: /\.(jpe?g|png)$/i,
-				loader: 'responsive-loader',
-				options: {
-					sizes: [360, 800, 1200, 1400], // the width of the output images, you should adapt to your app
-					placeholder: true,
-					adapter: require('responsive-loader/sharp'),
-					name: './assets/images/[hash]-[width].[ext]'
-				}
-			}
-		]
-	}
+    ......
+    module : {
+        rules : [
+            .....
+            {
+                test: /\.(jpe?g|png)$/i,
+                loader: 'responsive-loader',
+                options: {
+                    sizes: [360, 800, 1200, 1400], // the width of the output images, you should adapt to your app
+                    placeholder: true,
+                    adapter: require('responsive-loader/sharp'),
+                    name: './assets/images/[hash]-[width].[ext]'
+                }
+            }
+        ]
+    }
 }
 ```
 -----
@@ -390,14 +388,14 @@ we will use webpack built-in [ProvidePlugin](https://webpack.js.org/plugins/prov
 In `webpack.config.js`
 ```
 module.exports = {
-	.....
-	plugins : [
-		.....
-		new webpack.ProvidePlugin({
-			$: "jquery",
-			jQuery: "jquery"
-		}),
-	]
+    .....
+    plugins : [
+        .....
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery"
+        }),
+    ]
 }
 ```
 For example, the above config will import jquery to global context so that you and legacy library can use it with import it
@@ -410,13 +408,13 @@ In backend, you can achieve this with `.env` file and dot-env package, but in fr
 In `webpack.config.js`
 ```
 module.exports = {
-	.....
-	plugins : [
-		.....
-		new webpack.DefinePlugin({
-			'process.env.API_URL': JSON.stringify(process.env.API_URL),
-		})
-	]
+    .....
+    plugins : [
+        .....
+        new webpack.DefinePlugin({
+            'process.env.API_URL': JSON.stringify(process.env.API_URL),
+        })
+    ]
 }
 ```
 This config is depend on the host/platform you use, so the above code is just an example.
@@ -433,14 +431,14 @@ Add in `webpack.config.js`
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
-	......
-	plugins : [
-		......
-		new UglifyJsPlugin({
-			sourceMap : true,
-			cache : true
-		})
-	]
+    ......
+    plugins : [
+        ......
+        new UglifyJsPlugin({
+            sourceMap : true,
+            cache : true
+        })
+    ]
 }
 ```
 ------
@@ -455,23 +453,23 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-	context : path.resolve(__dirname),  //base directory, make webpack config independent from current working directory
-	entry : {
-		main : './src/index.js' //tell webpack where to start bundling your app
-	},
-	output : {
-		filename: '[name].[chunkhash].js', // the output file's name
-		path : path.resolve(__dirname, 'dist'), // where the file will be placed
-		publicPath : '/' //the path to access from the web
-	},
-	**~~devtool : 'inline-source-map',~~** // we don't need source map in production
-	module : {
-		rules : [
-			{
-				test: /\.(js)$/,
-				exclude: /node_modules/,
-				use: ['babel-loader']
-			},
+    context : path.resolve(__dirname),  //base directory, make webpack config independent from current working directory
+    entry : {
+        main : './src/index.js' //tell webpack where to start bundling your app
+    },
+    output : {
+        filename: '[name].[chunkhash].js', // the output file's name
+        path : path.resolve(__dirname, 'dist'), // where the file will be placed
+        publicPath : '/' //the path to access from the web
+    },
+    **~~devtool : 'inline-source-map',~~** // we don't need source map in production
+    module : {
+        rules : [
+            {
+                test: /\.(js)$/,
+                exclude: /node_modules/,
+                use: ['babel-loader']
+            },
       {
         test: /\.css$/,
         use: ExtractTextPlugin.extract({
@@ -501,49 +499,49 @@ module.exports = {
           ]
         })
       },
-			{
-				test: /\.(jpe?g|png)$/i,
-				loader: 'responsive-loader',
-				options: {
-					sizes: [360, 800, 1200, 1400],
-					placeholder: true,
-					adapter: require('responsive-loader/sharp'),
-					name: './assets/images/[hash]-[width].[ext]'
-				}
-		 }
-		]
-	},
-	plugins : [
-	  new ExtractTextPlugin({
-		  filename: 'styles/styles.[contenthash].css',
-		  allChunks: true
-	  }),
+            {
+                test: /\.(jpe?g|png)$/i,
+                loader: 'responsive-loader',
+                options: {
+                    sizes: [360, 800, 1200, 1400],
+                    placeholder: true,
+                    adapter: require('responsive-loader/sharp'),
+                    name: './assets/images/[hash]-[width].[ext]'
+                }
+         }
+        ]
+    },
+    plugins : [
+      new ExtractTextPlugin({
+          filename: 'styles/styles.[contenthash].css',
+          allChunks: true
+      }),
     new HtmlWebpackPlugin({
       template: `public/index.html`,
       favicon: `public/favicon.ico`
-	  }),
-		new webpack.optimize.CommonsChunkPlugin({
-			names : ['vendor', 'runtime']
-		}),
-		new webpack.ProvidePlugin({
-	    $: "jquery",
-	    jQuery: "jquery"
-	  }),
-		new webpack.DefinePlugin({
-			'process.env.API_URL': JSON.stringify(process.env.API_URL)
-		}),
-		new UglifyJsPlugin({
-			**~~sourceMap : true,~~**
-			cache : true
-		})
-	],
-	// we don't need dev-server, of course
-	**~~devServer: {
-		publicPath : '/',
-	  host: 'localhost', // combine with port, will server your app through localhost:8080
-	  port: 8080,
-	  historyApiFallback: true
-	}~~**
+      }),
+        new webpack.optimize.CommonsChunkPlugin({
+            names : ['vendor', 'runtime']
+        }),
+        new webpack.ProvidePlugin({
+        $: "jquery",
+        jQuery: "jquery"
+      }),
+        new webpack.DefinePlugin({
+            'process.env.API_URL': JSON.stringify(process.env.API_URL)
+        }),
+        new UglifyJsPlugin({
+            **~~sourceMap : true,~~**
+            cache : true
+        })
+    ],
+    // we don't need dev-server, of course
+    **~~devServer: {
+        publicPath : '/',
+      host: 'localhost', // combine with port, will server your app through localhost:8080
+      port: 8080,
+      historyApiFallback: true
+    }~~**
 }
 ```
 -----
@@ -552,8 +550,8 @@ For running cli command easier, we could add some to npm script
 In `package.json`
 ```
 "scripts" : {
-	"build": "webpack --config webpack.prod.config.js",
-	"build-dev" : "webpack-dev-server"
+    "build": "webpack --config webpack.prod.config.js",
+    "build-dev" : "webpack-dev-server"
 }
 ```
 
