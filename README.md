@@ -453,16 +453,16 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-    context : path.resolve(__dirname),  //base directory, make webpack config independent from current working directory
+    context : path.resolve(__dirname),
     entry : {
-        main : './src/index.js' //tell webpack where to start bundling your app
+        main : './src/index.js'
     },
     output : {
-        filename: '[name].[chunkhash].js', // the output file's name
-        path : path.resolve(__dirname, 'dist'), // where the file will be placed
-        publicPath : '/' //the path to access from the web
+        filename: '[name].[chunkhash].js',
+        path : path.resolve(__dirname, 'dist'),
+        publicPath : '/'
     },
-    **~~devtool : 'inline-source-map',~~** // we don't need source map in production
+    devtool : 'inline-source-map', // we don't need source map in production
     module : {
         rules : [
             {
@@ -478,10 +478,10 @@ module.exports = {
             {
               loader: 'css-loader',
               options: {
-                modules: true, // turn css selectors into hashes
-                importLoaders: 1, // 1 loader will be applied before css-loader
+                modules: true, 
+                importLoaders: 1,
                 camelCase: true,
-                **sourceMap: false** // same as inline-source-map 
+                sourceMap: false // same as inline-source-map 
               }
             },
             {
@@ -490,7 +490,7 @@ module.exports = {
                 config: {
                   ctx: {
                     autoprefixer: {
-                      browsers: 'last 2 versions' //only support last 2 versions of browser
+                      browsers: 'last 2 versions' 
                     }
                   }
                 }
@@ -531,17 +531,18 @@ module.exports = {
             'process.env.API_URL': JSON.stringify(process.env.API_URL)
         }),
         new UglifyJsPlugin({
-            **~~sourceMap : true,~~**
+            // sourceMap : true,
             cache : true
         })
     ],
     // we don't need dev-server, of course
-    **~~devServer: {
-        publicPath : '/',
-      host: 'localhost', // combine with port, will server your app through localhost:8080
-      port: 8080,
-      historyApiFallback: true
-    }~~**
+    //devServer: {
+    //   publicPath : '/',
+    //  host: 'localhost', // combine with port, will server your app through localhost:8080
+    //  port: 8080,
+    // historyApiFallback: true
+    //}
+    
 }
 ```
 -----
