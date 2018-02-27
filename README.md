@@ -68,7 +68,7 @@ module.exports = {
 	output : {
 		filename: '[name].[chunkhash].js', // the output file's name
 		path : path.resolve(__dirname, 'dist'), // where the file will be placed
-		publicPath : './' //the path to access from the web
+		publicPath : '/' //the path to access from the web
 	},
 	devtool : 'inline-source-map', // output source map, use to debug in browser devtools
 }
@@ -188,8 +188,8 @@ module.exports = {
 		        test: /\.(js)$/,
 		        exclude: /node_modules/,
 		        use: ['babel-loader']
-		     },
-		     .....
+			},
+			.....
 		]
 	}
 }
@@ -222,19 +222,19 @@ This is the current files structure
 ```
 Let create files and folders so it looks like this, the dist folder will be created when we run webpack
 ```
-|--assets //folder containing images, gif and stuff
+|--assets 							// folder containing images, gif and stuff
 |--node_modules
-|--public // folder containing HTML, favicon
-	|--index.html //base html file
-|--src // folder containing JS and CSS file
-	|--components // folder containing React components
-		|--app // the app component folder
+|--public 							// folder containing HTML, favicon
+	|--index.html 				// base html file
+|--src 									// folder containing JS and CSS file
+	|--components 				// folder containing React components
+		|--app 							// the app component folder
 			|--app.css
 			|--app.js
-		|--home // the home component folder
+		|--home 						// the home component folder
 			|--home.css
 			|--home.js
-	|--index.js // base JS file
+	|--index.js 					// base JS file
 |--.babelrc
 |--.gitignore
 |--package-lock.json
@@ -419,7 +419,143 @@ module.exports = {
 	]
 }
 ```
-This config is depend on the host/platform you use, so the above code is just an example, 
+This config is depend on the host/platform you use, so the above code is just an example.
+
+------
+#### Minify Js files
+Install plugin
+```
+npm install --save uglifyjs-webpack-plugin
+```
+Add in `webpack.config.js`
+```
+....
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+
+module.exports = {
+	......
+	plugins : [
+		......
+		new UglifyJsPlugin({
+			sourceMap : true,
+			cache : true
+		})
+	]
+}
+```
+------
+#### Production webpack configurations
+All the config we are currently using are suitable for development only, to use for production, we need to tweak it a little bit
+Create `webpack.prod.config.js` file, copy all the content from `webpack.config.js`, but with a few changes
+```
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const webpack = require('webpack');
+
+module.exports = {
+	context : path.resolve(__dirname),  //base directory, make webpack config independent from current working directory
+	entry : {
+		main : './src/index.js' //tell webpack where to start bundling your app
+	},
+	output : {
+		filename: '[name].[chunkhash].js', // the output file's name
+		path : path.resolve(__dirname, 'dist'), // where the file will be placed
+		publicPath : '/' //the path to access from the web
+	},
+	**~~devtool : 'inline-source-map',~~** // we don't need source map in production
+	module : {
+		rules : [
+			{
+				test: /\.(js)$/,
+				exclude: /node_modules/,
+				use: ['babel-loader']
+			},
+      {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: [
+            {
+              loader: 'css-loader',
+              options: {
+                modules: true, // turn css selectors into hashes
+                importLoaders: 1, // 1 loader will be applied before css-loader
+                camelCase: true,
+                **sourceMap: false** // same as inline-source-map 
+              }
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                config: {
+                  ctx: {
+                    autoprefixer: {
+                      browsers: 'last 2 versions' //only support last 2 versions of browser
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        })
+      },
+			{
+				test: /\.(jpe?g|png)$/i,
+				loader: 'responsive-loader',
+				options: {
+					sizes: [360, 800, 1200, 1400],
+					placeholder: true,
+					adapter: require('responsive-loader/sharp'),
+					name: './assets/images/[hash]-[width].[ext]'
+				}
+		 }
+		]
+	},
+	plugins : [
+	  new ExtractTextPlugin({
+		  filename: 'styles/styles.[contenthash].css',
+		  allChunks: true
+	  }),
+    new HtmlWebpackPlugin({
+      template: `public/index.html`,
+      favicon: `public/favicon.ico`
+	  }),
+		new webpack.optimize.CommonsChunkPlugin({
+			names : ['vendor', 'runtime']
+		}),
+		new webpack.ProvidePlugin({
+	    $: "jquery",
+	    jQuery: "jquery"
+	  }),
+		new webpack.DefinePlugin({
+			'process.env.API_URL': JSON.stringify(process.env.API_URL)
+		}),
+		new UglifyJsPlugin({
+			**~~sourceMap : true,~~**
+			cache : true
+		})
+	],
+	// we don't need dev-server, of course
+	**~~devServer: {
+		publicPath : '/',
+	  host: 'localhost', // combine with port, will server your app through localhost:8080
+	  port: 8080,
+	  historyApiFallback: true
+	}~~**
+}
+```
+-----
+#### npm script
+For running cli command easier, we could add some to npm script
+In `package.json`
+```
+"scripts" : {
+	"build": "webpack --config webpack.prod.config.js",
+	"build-dev" : "webpack-dev-server"
+}
+```
 
 ## Authors
 
@@ -433,3 +569,5 @@ Some useful link
 [How commonschunkplugin work](https://stackoverflow.com/questions/39548175/can-someone-explain-webpacks-commonschunkplugin)
 
 [Getting the most out of the CommonsChunkPlugin()](https://medium.com/webpack/webpack-bits-getting-the-most-out-of-the-commonschunkplugin-ab389e5f318)
+
+[How to use Webpack with React: an in-depth tutorial](https://medium.freecodecamp.org/learn-webpack-for-react-a36d4cac5060)
