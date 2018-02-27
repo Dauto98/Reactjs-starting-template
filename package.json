@@ -33,7 +33,9 @@
     "semantic-ui-react": "^0.78.2",
     "sharp": "^0.19.1",
     "style-loader": "^0.20.2",
+    "uglifyjs-webpack-plugin": "^1.2.2",
     "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.1"
-  }
+  },
+  "devDependencies": {}
 }

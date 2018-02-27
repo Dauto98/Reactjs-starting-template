@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
@@ -11,7 +12,7 @@ module.exports = {
 	output : {
 		filename: '[name].[chunkhash].js', // the output file's name
 		path : path.resolve(__dirname, 'dist'), // where the file will be placed
-		publicPath : './' //the path to access from the web
+		publicPath : '/' //the path to access from the web
 	},
 	devtool : 'inline-source-map', // output source map, use to debug in browser devtools
 	module : {
@@ -79,6 +80,10 @@ module.exports = {
 	    jQuery: "jquery"
 	  }),
 		// new webpack.DefinePlugin({})
+		new UglifyJsPlugin({
+			sourceMap : true,
+			cache : true
+		})
 	],
 	devServer: {
 		publicPath : '/',
