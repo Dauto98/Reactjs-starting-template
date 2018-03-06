@@ -333,19 +333,64 @@ Now open http://localhost:8080/ you should see your app
 ------
 #### Commons chunk plugin
 This section is about optimize bundle with [commons chunk plugin](https://webpack.js.org/plugins/commons-chunk-plugin/)
+For more detail about this setup, take a look at these great articles
+[Predictable long term caching with Webpack](https://medium.com/webpack/predictable-long-term-caching-with-webpack-d3eee1d3fa31)
+
+[How to bundle vendor scripts separately and require them as needed with Webpack?](https://stackoverflow.com/questions/30329337/how-to-bundle-vendor-scripts-separately-and-require-them-as-needed-with-webpack)
+
+
+Install name-all-modules-plugin
+```
+npm install --save name-all-modules-plugin
+```
 
 Add this to your `webpack.config.js`
 ```
 ......
 const webpack = require('webpack');
+const NameAllModulesPlugin = require("name-all-modules-plugin");
+
+/**
+ * check if the modules is from 3rd party
+ */
+function isExternal(module) {
+	var context = module.context;
+
+	if (typeof context !== "string") {
+		return false;
+	}
+
+	return context.indexOf("node_modules") !== -1;
+}
 
 module.exports = {
     .....
     plugins : [
         ....
-        new webpack.optimize.CommonsChunkPlugin({
-            names : ['vendor', 'runtime']
-        })
+		new webpack.NamedChunksPlugin(),
+		new webpack.NamedModulesPlugin(),
+		new NameAllModulesPlugin(),
+		// Extract all node modules so that this chunk is not affected when we change our code
+        // help in caching
+		new webpack.optimize.CommonsChunkPlugin({
+			names : ["vendor"],
+			minChunks: function(module) {
+				return isExternal(module);
+			}
+		}),
+		// Extract all common thing in our code
+		new webpack.optimize.CommonsChunkPlugin({
+			names : ["common"],
+			chunks : ["main"], // Specify our chunk name to search for common modules
+			minChunks : function (module, count) {
+				return !isExternal(module) && count > 1;
+			}
+		}),
+		// Extract webpack runtime code
+		new webpack.optimize.CommonsChunkPlugin({
+			names : ["runtime"],
+			minChunks: Infinity
+		}),
     ]
 }
 ```
@@ -463,7 +508,21 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const NameAllModulesPlugin = require("name-all-modules-plugin");
 const webpack = require('webpack');
+
+/**
+ * check if the modules is from 3rd party
+ */
+function isExternal(module) {
+	var context = module.context;
+
+	if (typeof context !== "string") {
+		return false;
+	}
+
+	return context.indexOf("node_modules") !== -1;
+}
 
 module.exports = {
     context : path.resolve(__dirname),
@@ -525,17 +584,38 @@ module.exports = {
         ]
     },
     plugins : [
-      new ExtractTextPlugin({
-          filename: 'styles/styles.[contenthash].css',
-          allChunks: true
-      }),
-    new HtmlWebpackPlugin({
-      template: `public/index.html`,
-      favicon: `public/favicon.ico`
-      }),
-        new webpack.optimize.CommonsChunkPlugin({
-            names : ['vendor', 'runtime']
+        new ExtractTextPlugin({
+            filename: 'styles/styles.[contenthash].css',
+            allChunks: true
         }),
+        new HtmlWebpackPlugin({
+            template: `public/index.html`,
+            favicon: `public/favicon.ico`
+        }),
+        new webpack.NamedChunksPlugin(),
+        new webpack.NamedModulesPlugin(),
+        new NameAllModulesPlugin(),
+		// Extract all node modules so that this chunk is not affected when we change our code
+		// help in caching
+		new webpack.optimize.CommonsChunkPlugin({
+			names : ["vendor"],
+			minChunks: function(module) {
+				return isExternal(module);
+			}
+		}),
+		// Extract all common thing in our code
+		new webpack.optimize.CommonsChunkPlugin({
+			names : ["common"],
+			chunks : ["main"], // Specify our chunk name to search for common modules
+			minChunks : function (module, count) {
+				return !isExternal(module) && count > 1;
+			}
+		}),
+		// Extract webpack runtime code
+		new webpack.optimize.CommonsChunkPlugin({
+			names : ["runtime"],
+			minChunks: Infinity
+		}),
         new webpack.ProvidePlugin({
         $: "jquery",
         jQuery: "jquery"
