@@ -20,6 +20,7 @@ Nodejs
 * [Semantic UI React](https://react.semantic-ui.com/introduction) - CSS framwork for React, of course you can use other like Bootstrap
 * [Webpack](https://webpack.js.org/) - Module bundler
 * [Babel](https://babeljs.io/) - Transpile JSX and "future" javascript features
+* [Eslint](https://eslint.org/) - Make your Js code "healthier" 
 
 
 ## Installing from the ground up
@@ -441,6 +442,18 @@ module.exports = {
     ]
 }
 ```
+------
+#### Add eslint
+Install eslint
+```
+npm install --save-dev eslint
+```
+Set up eslint config
+```
+./node_modules/.bin/eslint --init
+```
+Choose options that suiltable for you
+
 ------
 #### Production webpack configurations
 All the config we are currently using are suitable for development only, to use for production, we need to tweak it a little bit
