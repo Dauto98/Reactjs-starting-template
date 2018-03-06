@@ -6,7 +6,7 @@ import { Divider } from 'semantic-ui-react';
 import Home from '../home/home.js';
 
 const App = () => {
-  return (
+	return (
 		<BrowserRouter>
 			<div>
 				<nav>
@@ -18,7 +18,7 @@ const App = () => {
 				</Switch>
 			</div>
 		</BrowserRouter>
-  );
+	);
 };
 
 export default App;
