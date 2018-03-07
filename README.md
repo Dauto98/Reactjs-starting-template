@@ -3,7 +3,8 @@
 
 This repo includes basic setup for Reactjs
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. Please note that this is not suitable for production yet
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+For final configuration, you can check the repo
 
 ## Prerequisites
 
@@ -17,6 +18,7 @@ Nodejs
 
 * [ReactJs](https://reactjs.org/) - UI library
 * [React-router](https://github.com/ReactTraining/react-router) - Turn your app into SPA
+* [React-prop-types](https://reactjs.org/docs/typechecking-with-proptypes.html) - Check the data type of the props
 * [Semantic UI React](https://react.semantic-ui.com/introduction) - CSS framwork for React, of course you can use other like Bootstrap
 * [Webpack](https://webpack.js.org/) - Module bundler
 * [Babel](https://babeljs.io/) - Transpile JSX and "future" javascript features
@@ -53,7 +55,7 @@ npm init -y
 ```
 ----------
 #### Set up webpack configuration
-Install webpack (3.11.0) (webpack 4.0.0 is out but it has a lot of different configuration from what we will code below)
+Install webpack (3.11.0) (webpack 4.0.0 is released at the time this post is being written, and it has a lot of different configuration compare to v3)
 ```
 npm install --save webpack@3.11.0
 ```
@@ -133,6 +135,19 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: `public/index.html`,
             //favicon: `public/favicon.ico` // if you have one
+			// we ensure that the output files is included in the right order since the config in CommonsChunkPlugin section
+			// below somehow break the default sort function
+			chunksSortMode : function orderEntryLast(a, b) {
+				if (a.entry !== b.entry) {
+					return b.entry ? 1 : -1;
+				} else if (a.id.includes("vendor")) {
+					return -1;
+				} else if (b.id.includes("vendor")) {
+					return 1;
+				} else {
+					return b.id - a.id;
+				}
+			}
         }),
     ]
 }
@@ -145,8 +160,9 @@ module.exports = {
 ```
 
 Config [webpack-dev-server](https://webpack.js.org/configuration/dev-server/#devserver), use to serve the app without coding the backend
+We install v2.11.1 since the latest version require webpack v4
 ```
-npm install --save webpack-dev-server
+npm install --save webpack-dev-server@2.11.1
 ```
 Add to the config file
 ```
@@ -334,6 +350,7 @@ Now open http://localhost:8080/ you should see your app
 #### Commons chunk plugin
 This section is about optimize bundle with [commons chunk plugin](https://webpack.js.org/plugins/commons-chunk-plugin/)
 For more detail about this setup, take a look at these great articles
+
 [Predictable long term caching with Webpack](https://medium.com/webpack/predictable-long-term-caching-with-webpack-d3eee1d3fa31)
 
 [How to bundle vendor scripts separately and require them as needed with Webpack?](https://stackoverflow.com/questions/30329337/how-to-bundle-vendor-scripts-separately-and-require-them-as-needed-with-webpack)
@@ -497,7 +514,35 @@ Set up eslint config
 ```
 ./node_modules/.bin/eslint --init
 ```
-Choose options that suiltable for you
+Choose options that suiltable for you, if you say 'y' to React rule (and you should, this is react app, right?), add this to the `.eslintrc` file to fix JSX unused vars bug
+```
+"extends": [
+ 	"eslint:recommended",
+ 	"plugin:react/recommended"
+ ],
+```
+------
+#### Clean up dist folder
+Since you will change your code during development, sometime webpack outputted files to dist folder is different, and old files remained in the folder, we want to clean that up, so we will use [Clean-webpack-plugin](https://github.com/johnagan/clean-webpack-plugin)
+
+Install 
+```
+npm install --save clean-webpack-plugin
+```
+In `webpack.config.js`:
+```
+.....
+const CleanWebpackPlugin = require("clean-webpack-plugin");
+....
+
+module.exports = {
+	.....
+	plugins : [
+		new CleanWebpackPlugin(path.resolve(__dirname, "./dist")),
+	]
+}
+
+```
 
 ------
 #### Production webpack configurations
@@ -588,10 +633,21 @@ module.exports = {
             filename: 'styles/styles.[contenthash].css',
             allChunks: true
         }),
-        new HtmlWebpackPlugin({
-            template: `public/index.html`,
-            favicon: `public/favicon.ico`
-        }),
+		new HtmlWebpackPlugin({
+			template: "public/index.html",
+			favicon : "public/favicon.ico",
+			chunksSortMode : function orderEntryLast(a, b) {
+				if (a.entry !== b.entry) {
+					return b.entry ? 1 : -1;
+				} else if (a.id.includes("vendor")) {
+					return -1;
+				} else if (b.id.includes("vendor")) {
+					return 1;
+				} else {
+					return b.id - a.id;
+				}
+			}
+		}),
         new webpack.NamedChunksPlugin(),
         new webpack.NamedModulesPlugin(),
         new NameAllModulesPlugin(),
@@ -641,7 +697,7 @@ module.exports = {
 -----
 #### npm script
 For running cli command easier, we could add some to npm script
-In `package.json`
+For example, in `package.json`
 ```
 "scripts" : {
     "build": "webpack --config webpack.prod.config.js",
@@ -654,7 +710,7 @@ In `package.json`
 * **Nguyen Duc Anh**  - [Dauto98](https://github.com/Dauto98)
 
 ## Reference
-Some useful link
+Some great articles which help me to finish this setup guide
 
 [Predictable long term caching with Webpack](https://medium.com/webpack/predictable-long-term-caching-with-webpack-d3eee1d3fa31)
 
