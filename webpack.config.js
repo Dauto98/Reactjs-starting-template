@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const NameAllModulesPlugin = require("name-all-modules-plugin");
+const CleanWebpackPlugin = require("clean-webpack-plugin");
 const webpack = require("webpack");
 
 /**
@@ -78,13 +79,24 @@ module.exports = {
 		]
 	},
 	plugins : [
+		new CleanWebpackPlugin(path.resolve(__dirname, "./dist")),
 		new ExtractTextPlugin({
 			filename: "styles/styles.[contenthash].css",
 			allChunks: true
 		}),
 		new HtmlWebpackPlugin({
 			template: "public/index.html",
-			//favicon: "public/favicon.ico"
+			chunksSortMode : function orderEntryLast(a, b) {
+				if (a.entry !== b.entry) {
+					return b.entry ? 1 : -1;
+				} else if (a.id.includes("vendor")) {
+					return -1;
+				} else if (b.id.includes("vendor")) {
+					return 1;
+				} else {
+					return b.id - a.id;
+				}
+			}
 		}),
 		new webpack.NamedChunksPlugin(),
 		new webpack.NamedModulesPlugin(),
