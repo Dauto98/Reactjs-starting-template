@@ -1,10 +1,13 @@
 
+
 # ReactJs-starting-template
 
-This repo includes basic setup for Reactjs
+This repo includes basic setup for Webpack to use in React project
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-For final configuration, you can check the repo
+The guide will be divided in to small sections, each section will contain setup for 1 module or functionality.
+For final configuration, you can check the repo.
+
+(The code in the repo is for webpack 3 on branch master)
 
 ## Prerequisites
 
@@ -14,19 +17,33 @@ You need to have in your machine:
 Nodejs
 ```
 
-## What we will install
+## Table of content
+1. [gitignore](#gitignore-and-npm)
+2. [eslint](#add-eslint)
+3. [base webpack config](#set-up-webpack-configuration)
+4. [html, css loaders and plugins](#install-some-common-loaders-and-plugins-for-html-css)
+5. [dev-server](#webpack-dev-server)
+6. [Babel](#set-up-babel)
+7. [Splitchunk](#split-chunk)
+8. [Naming modules and chunks](#naming-modules-and-chunks)
+9. [Clean up dist folder](#clean-up-dist-folder)
+10. [Responsive images](#make-images-responsive)
+11. [Support legacy modules](#support-legacy-modules)
+12. [Using env variable](#using-environment-variables)
+13. [Minify js](#minify-js-files)
+14. [npm script](#npm-script)
+15. [Async component](#async-component-for-react)
+TODO:
+16.  Service worker
+17. Webpack PWA plugin
 
-* [ReactJs](https://reactjs.org/) - UI library
-* [React-router](https://github.com/ReactTraining/react-router) - Turn your app into SPA
-* [React-prop-types](https://reactjs.org/docs/typechecking-with-proptypes.html) - Check the data type of the props
-* [Semantic UI React](https://react.semantic-ui.com/introduction) - CSS framwork for React, of course you can use other like Bootstrap
+## What we will install
 * [Webpack](https://webpack.js.org/) - Module bundler
 * [Babel](https://babeljs.io/) - Transpile JSX and "future" javascript features
-* [Eslint](https://eslint.org/) - Make your Js code "healthier" 
+* [Eslint](https://eslint.org/) - Make your Js code "healthier"
 
-
-## Installing from the ground up
-
+## Install
+#### gitignore and npm
 First, add .gitignore file to your project root directory
 ```
 # Bower dependency directory
@@ -53,368 +70,231 @@ Create package.json file, -y mean accept default values
 ```
 npm init -y
 ```
-----------
-#### Set up webpack configuration
-Install webpack (3.11.0) (webpack 4.0.0 is released at the time this post is being written, and it has a lot of different configuration compare to v3)
+-----
+#### Add eslint
+Install eslint
 ```
-npm install --save webpack@3.11.0
+npm install --save-dev eslint
+```
+Set up eslint config
+```
+./node_modules/.bin/eslint --init
+```
+Choose options that suiltable for you, if you say 'y' to React rule (and you should, this is react app, right?), add this to the `.eslintrc` file to remove JSX unused vars error
+```
+"extends": [
+ 	"eslint:recommended",
+ 	"plugin:react/recommended"
+ ],
+```
+If you use object spread operator (eg. {...props}) then add this to `.eslintrc`
+```
+"parserOptions": {
+   "ecmaFeatures": {
+       ......
+       "experimentalObjectRestSpread": true
+    },
+	.....
+},
+```
+
+-----
+#### Set up webpack configuration
+Install webpack and webpack-cli (save or save-dev is based on your project)
+```
+npm install --save webpack webpack-cli
 ```
 Create `webpack.config.js` file in your project root directory, add the following content to the file
 ```
-const path = require('path');
+const path = require("path");
 
 module.exports = {
-    context : path.resolve(__dirname),  //base directory, make webpack config independent from current working directory
-    entry : {
-        main : './src/index.js' //tell webpack where to start bundling your app
-    },
-    output : {
-        filename: '[name].[chunkhash].js', // the output file's name
-        path : path.resolve(__dirname, 'dist'), // where the file will be placed
-        publicPath : '/' //the path to access from the web
-    },
-    devtool : 'inline-source-map', // output source map, use to debug in browser devtools
-}
+  mode : "development",
+  context : path.resolve(__dirname), // make all relative path relative to this instead of cwd
+  entry : {
+    main : "./src/index.js" // chunkname : "path to start bundling this chunk"
+  },
+  output : {
+    filename : "[name].[chunkhash].js", // name of the outputed files
+    path : path.resolve(__dirname, "dist"), // where to put those files
+    publicPath : "/" // the address seen from the web URL, after the domain
+  },
+  devtool: "eval" // source map
+};
 ```
-
-Install loaders and plugins to enhance webpack functionality
+-------
+#### Install some common loaders and plugins for html, css
 ```
-npm install --save html-webpack-plugin css-loader style-loader extract-text-webpack-plugin postcss-loader
+npm install --save html-webpack-plugin css-loader mini-css-extract-plugin postcss-loader
 ```
-- [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin):(2.30.1) inject 'bundle.js' script tag to html template automatically for us
-- [css-loader](https://github.com/webpack-contrib/css-loader)(0.28.10), [style-loader](https://github.com/webpack-contrib/style-loader)(0.20.2): allow webpack to handle css file 
-- [extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin)(3.0.2): extract css out into external css files
-- [postcss-loader](https://github.com/postcss/postcss-loader)(2.1.0): prefix and minify css files
+- [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin): inject 'bundle.js' script tag to html template automatically for us
+- [css-loader](https://github.com/webpack-contrib/css-loader): allow webpack to handle css file
+- [mini-css-extract-plugin](https://github.com/webpack-contrib/mini-css-extract-plugin): extract css out into external css files
+- [postcss-loader](https://github.com/postcss/postcss-loader): prefix and minify css files
 
 Add to the config file
 ```
 .....
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
-    ....
-    module : {
-        rules : [
+  ....
+  module : {
+    rules : [
+      {
+        test: /\.css$/,
+        use: [
+          MiniCssExtractPlugin.loader,
           {
-            test: /\.css$/,
-            use: ExtractTextPlugin.extract({
-              fallback: 'style-loader',
-              use: [
-                {
-                  loader: 'css-loader',
-                  options: {
-                    modules: true, // turn css selectors into hashes
-                    importLoaders: 1, // 1 loader will be applied before css-loader
-                    camelCase: true,
-                    sourceMap: true
-                  }
-                },
-                {
-                  loader: 'postcss-loader',
-                  options: {
-                    config: {
-                      ctx: {
-                        autoprefixer: {
-                          browsers: 'last 2 versions' //only support last 2 versions of browser
-                        }
-                      }
-                    }
+            loader: "css-loader",
+            options: {
+              modules: true, // turn css selectors into hashes
+              importLoaders: 1, // 1 loader will be applied before css-loader
+              camelCase: true,
+              sourceMap: true
+            }
+          },
+          {
+            loader: "postcss-loader",
+            options: {
+              config: {
+                ctx: {
+                  autoprefixer: {
+                    browsers: "last 2 versions" //only support last 2 versions of browser
                   }
                 }
-              ]
-            })
+              }
+            }
           }
         ]
-    },
-    plugins : [
-        new ExtractTextPlugin({
-            filename: 'styles/styles.[contenthash].css',
-            allChunks: true
-        }),
-        new HtmlWebpackPlugin({
-            template: `public/index.html`,
-            //favicon: `public/favicon.ico` // if you have one
-			// we ensure that the output files is included in the right order since the config in CommonsChunkPlugin section
-			// below somehow break the default sort function
-			chunksSortMode : function orderEntryLast(a, b) {
-				if (a.entry !== b.entry) {
-					return b.entry ? 1 : -1;
-				} else if (a.id.includes("vendor")) {
-					return -1;
-				} else if (b.id.includes("vendor")) {
-					return 1;
-				} else {
-					return b.id - a.id;
-				}
-			}
-        }),
+      }
     ]
+  },
+  plugins : [
+    new MiniCssExtractPlugin({
+      filename: "[name].css", // sync chunk
+      chunkFilename: "[id].css" // async chunk
+    }),
+    new HtmlWebpackPlugin({
+      template: "public/index.html",
+      //favicon: `public/favicon.ico` // if you have one
+    }),
+  ]
 }
 ```
 Create `postcss.config.js` file and add the following content
 ```
 module.exports = {
-    plugins: [require('autoprefixer')]
+  plugins: [require('autoprefixer')]
 };
 ```
-
+------
+#### Webpack dev server
 Config [webpack-dev-server](https://webpack.js.org/configuration/dev-server/#devserver), use to serve the app without coding the backend
-We install v2.11.1 since the latest version require webpack v4
 ```
-npm install --save webpack-dev-server@2.11.1
+npm install --save webpack-dev-server
 ```
 Add to the config file
 ```
 module.exports = {
-    ......
-    devServer: {
-        publicPath : '/', // this need to be the same as output.publicPath
-        host: 'localhost', // combine with port, will server your app through localhost:8080
-        port: 8080,
-        historyApiFallback: true
-    }
+  ......
+  devServer: {
+    publicPath : "/", // this need to be the same as output.publicPath
+    host: "localhost", // combine with port, will server your app through localhost:8080
+    port: 8080,
+    historyApiFallback: true
+  },
 }
 ```
--------
+-----
 #### Set up babel
 Babel is used to transpile JSX and ES201x js code to older js standard for some old browser
 Install
 ```
-npm install --save babel-core babel-loader babel-preset-env babel-preset-react
+npm install --save babel-core babel-loader babel-preset-env babel-preset-react babel-plugin-transform-class-properties babel-plugin-transform-object-rest-spread
 ```
-- [babel-core](https://babeljs.io/docs/core-packages/)(6.26.0): core dependency for babel
-- [babel-loader](https://github.com/babel/babel-loader)(7.1.2): using babel with webpack
-- [babel-preset-env](https://github.com/babel/babel/tree/master/packages/babel-preset-env)(1.6.1): transpile ES2015+ code
-- [babel-preset-react](https://babeljs.io/docs/plugins/preset-react/)(6.24.1): transpile JSX code
+- [babel-core](https://babeljs.io/docs/core-packages/): core dependency for babel
+- [babel-loader](https://github.com/babel/babel-loader): using babel with webpack
+- [babel-preset-env](https://github.com/babel/babel/tree/master/packages/babel-preset-env): transpile ES2015+ code
+- [babel-preset-react](https://babeljs.io/docs/plugins/preset-react/): transpile JSX code
+- [babel-plugin-transform-class-properties](https://babeljs.io/docs/en/babel-plugin-transform-class-properties/): using class properties in javascript class
+- [babel-plugin-transform-object-rest-spread](https://babeljs.io/docs/en/babel-plugin-transform-object-rest-spread/): handle object spread operator
 
 Create `.babelrc` in your project root directory,  this is the babel configuration file
 ```
 //.babelrc
 {
-    "presets": ["env", "react"]
+  "presets": ["env", "react"],
+  "plugins": ["transform-object-rest-spread", "transform-class-properties"]
 }
 ```
 Add rule to `webpack.config.js` file
 ```
 module.exports = {
-    ......
-    module : {
-        rules : [
-            {
-                test: /\.(js)$/,
-                exclude: /node_modules/,
-                use: ['babel-loader']
-            },
-            .....
-        ]
+  ......
+  module : {
+    rules : [
+      {
+        test: /\.(js)$/,
+        exclude: /node_modules/,
+        use: ["babel-loader"]
+      },
+      .....
+    ]
+  }
+}
+```
+------
+#### Split chunk
+In webpack 4, `optimization.splitChunks` is used instead of CommonsChunkPlugin and is turned on by default in production mode.
+To split out the vendor code, add the following config
+```
+optimization : {
+  runtimeChunk : true, // create a chunk containing webpack runtime coode
+  splitChunks : {
+    cacheGroups : {
+      vendors : {
+        test : /[\\/]node_modules[\\/]/, // get all modules in node_modules
+        priority: -10,
+        chunks : "all",
+        name : "vendor"
+      }
     }
-}
+  }
+},
 ```
-
+--------
+#### Naming modules and chunk
+Give each chunk and module a name instead of numeric id, which might break your long term caching (different id for the same chunk)
+This is turned on by default in development mode
+```
+optimization : {
+  namedModules : true,
+  namedChunks : true,
+},
+```
 ------
+#### Clean up dist folder
+Since you will change your code during development, sometime webpack outputted files to dist folder is different, and old files remained in the folder, we want to clean that up, so we will use [Clean-webpack-plugin](https://github.com/johnagan/clean-webpack-plugin)
 
-#### Create React app
-We will create a sample React app and serve it by webpack-dev-server
-
-Install dependencies
-
+Install
 ```
-npm install --save react react-dom react-router-dom semantic-ui-react
+npm install --save clean-webpack-plugin
 ```
-
-- react, react-dom: core react packages
-- react-router-dom: react routing package for web app
-- semantic-ui-react: CSS framwork
-
-This is the current files structure
+In `webpack.config.js`:
 ```
-|--node_modules
-|--.babelrc
-|--.gitignore
-|--package-lock.json
-|--package.json
-|--postcss.config.js
-|--webpack.config.js
-```
-Let create files and folders so it looks like this, the dist folder will be created when we run webpack
-```
-|--assets                 // folder containing images, gif and stuff
-|--node_modules
-|--public                 // folder containing HTML, favicon
-    |--index.html         // base html file
-|--src                    // folder containing JS and CSS file
-    |--components         // folder containing React components
-        |--app            // the app component folder
-            |--app.css
-            |--app.js
-        |--home           // the home component folder
-            |--home.css
-            |--home.js
-    |--index.js           // base JS file
-|--.babelrc
-|--.gitignore
-|--package-lock.json
-|--package.json
-|--postcss.config.js
-|--webpack.config.js
-```
-In the `index.html`, add the following
-```
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>React-starting-template</title>
-
-      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.min.css"></link>
-    </head>
-
-    <body>
-      <div id="root"></div>
-    </body>
-</html>
-```
-In the `index.js`, add the following
-```
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './components/app/app.js';
-
-ReactDOM.render(<App />, document.getElementById('root'));
-```
-This code render App component to the screen, let add content to the `app.js` file
-```
-import React from 'react';
-import { Switch, BrowserRouter, Route, Link } from 'react-router-dom';
-
-import { Divider } from 'semantic-ui-react';
-
-import Home from '../home/home.js';
-
-const App = () => {
-  return (
-        <BrowserRouter>
-            <div>
-                <nav>
-                    <Link to='/'>Home</Link>
-                </nav>
-                <Divider />
-                <Switch>
-                    <Route exact path="/" component={Home} />
-                </Switch>
-            </div>
-        </BrowserRouter>
-  );
-};
-
-export default App;
-```
-This component render Home component in Route component when the url is matched
-
-Let's open `home.js` file and code 
-```
-import React from 'react';
-import { Header } from 'semantic-ui-react';
-
-import { h1 } from './home.css';
-
-const Home = () => {
-    return (
-        <Header as="h1" className={h1}>
-            Hello world
-        </Header>
-    )
-}
-
-export default Home;
-```
-In `home.css`
-```
-.h1 {
-    font-weight: 400;
-}
-```
-Now, run this in your terminal (cd to your project root directory) 
-```
-npx webpack
-```
-Compile everything and put into the `dist` folder
-```
-npx webpack-dev-server
-```
-Now open http://localhost:8080/ you should see your app
-
-------
-#### Commons chunk plugin
-This section is about optimize bundle with [commons chunk plugin](https://webpack.js.org/plugins/commons-chunk-plugin/)
-For more detail about this setup, take a look at these great articles
-
-[Predictable long term caching with Webpack](https://medium.com/webpack/predictable-long-term-caching-with-webpack-d3eee1d3fa31)
-
-[How to bundle vendor scripts separately and require them as needed with Webpack?](https://stackoverflow.com/questions/30329337/how-to-bundle-vendor-scripts-separately-and-require-them-as-needed-with-webpack)
-
-
-Install name-all-modules-plugin
-```
-npm install --save name-all-modules-plugin
-```
-
-Add this to your `webpack.config.js`
-```
-......
-const webpack = require('webpack');
-const NameAllModulesPlugin = require("name-all-modules-plugin");
-
-/**
- * check if the modules is from 3rd party
- */
-function isExternal(module) {
-	var context = module.context;
-
-	if (typeof context !== "string") {
-		return false;
-	}
-
-	return context.indexOf("node_modules") !== -1;
-}
+.....
+const CleanWebpackPlugin = require("clean-webpack-plugin");
+....
 
 module.exports = {
-    .....
-    plugins : [
-        ....
-		new webpack.NamedChunksPlugin(),
-		new webpack.NamedModulesPlugin(),
-		new NameAllModulesPlugin(),
-		// Extract all node modules so that this chunk is not affected when we change our code
-        // help in caching
-		new webpack.optimize.CommonsChunkPlugin({
-			names : ["vendor"],
-			minChunks: function(module) {
-				return isExternal(module);
-			}
-		}),
-		// Extract all common thing in our code
-		new webpack.optimize.CommonsChunkPlugin({
-			names : ["common"],
-			chunks : ["main"], // Specify our chunk name to search for common modules
-			minChunks : function (module, count) {
-				return !isExternal(module) && count > 1;
-			}
-		}),
-		// Extract webpack runtime code
-		new webpack.optimize.CommonsChunkPlugin({
-			names : ["runtime"],
-			minChunks: Infinity
-		}),
-    ]
+	.....
+	plugins : [
+		new CleanWebpackPlugin(path.resolve(__dirname, "./dist")),
+	]
 }
 ```
-The vendor will contain module shared between chunks and runtime contains webpack runtime code
-Now run webpack again and you will see more output files with smaller size
-
-------
+-------
 ####  Make images responsive
 This section is about processing images through webpack so that it is "responsive"
 Install
@@ -482,8 +362,10 @@ module.exports = {
 ```
 This config is depend on the host/platform you use, so the above code is just an example.
 
-------
+-----
 #### Minify Js files
+In webpack 4, minify js is enabled by default in production mode, so no need for configuration.
+If you want to tweak some config, then
 Install plugin
 ```
 npm install --save uglifyjs-webpack-plugin
@@ -494,216 +376,40 @@ Add in `webpack.config.js`
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
-    ......
-    plugins : [
-        ......
-        new UglifyJsPlugin({
-            sourceMap : true,
-            cache : true
-        })
+  ......
+  optimization : {
+    minimizer : [
+      new UglifyJsPlugin({
+        sourceMap : true,
+        cache : true
+      })
     ]
+  }
 }
 ```
 ------
-#### Add eslint
-Install eslint
-```
-npm install --save-dev eslint
-```
-Set up eslint config
-```
-./node_modules/.bin/eslint --init
-```
-Choose options that suiltable for you, if you say 'y' to React rule (and you should, this is react app, right?), add this to the `.eslintrc` file to fix JSX unused vars bug
-```
-"extends": [
- 	"eslint:recommended",
- 	"plugin:react/recommended"
- ],
-```
-------
-#### Clean up dist folder
-Since you will change your code during development, sometime webpack outputted files to dist folder is different, and old files remained in the folder, we want to clean that up, so we will use [Clean-webpack-plugin](https://github.com/johnagan/clean-webpack-plugin)
-
-Install 
-```
-npm install --save clean-webpack-plugin
-```
-In `webpack.config.js`:
-```
-.....
-const CleanWebpackPlugin = require("clean-webpack-plugin");
-....
-
-module.exports = {
-	.....
-	plugins : [
-		new CleanWebpackPlugin(path.resolve(__dirname, "./dist")),
-	]
-}
-
-```
-
-------
-#### Production webpack configurations
-All the config we are currently using are suitable for development only, to use for production, we need to tweak it a little bit
-Create `webpack.prod.config.js` file, copy all the content from `webpack.config.js`, but with a few changes
-```
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const NameAllModulesPlugin = require("name-all-modules-plugin");
-const webpack = require('webpack');
-
-/**
- * check if the modules is from 3rd party
- */
-function isExternal(module) {
-	var context = module.context;
-
-	if (typeof context !== "string") {
-		return false;
-	}
-
-	return context.indexOf("node_modules") !== -1;
-}
-
-module.exports = {
-    context : path.resolve(__dirname),
-    entry : {
-        main : './src/index.js'
-    },
-    output : {
-        filename: '[name].[chunkhash].js',
-        path : path.resolve(__dirname, 'dist'),
-        publicPath : '/'
-    },
-    devtool : 'inline-source-map', // we don't need source map in production
-    module : {
-        rules : [
-            {
-                test: /\.(js)$/,
-                exclude: /node_modules/,
-                use: ['babel-loader']
-            },
-      {
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: [
-            {
-              loader: 'css-loader',
-              options: {
-                modules: true, 
-                importLoaders: 1,
-                camelCase: true,
-                sourceMap: false // same as inline-source-map 
-              }
-            },
-            {
-              loader: 'postcss-loader',
-              options: {
-                config: {
-                  ctx: {
-                    autoprefixer: {
-                      browsers: 'last 2 versions' 
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        })
-      },
-            {
-                test: /\.(jpe?g|png)$/i,
-                loader: 'responsive-loader',
-                options: {
-                    sizes: [360, 800, 1200, 1400],
-                    placeholder: true,
-                    adapter: require('responsive-loader/sharp'),
-                    name: './assets/images/[hash]-[width].[ext]'
-                }
-         }
-        ]
-    },
-    plugins : [
-        new ExtractTextPlugin({
-            filename: 'styles/styles.[contenthash].css',
-            allChunks: true
-        }),
-		new HtmlWebpackPlugin({
-			template: "public/index.html",
-			favicon : "public/favicon.ico",
-			chunksSortMode : function orderEntryLast(a, b) {
-				if (a.entry !== b.entry) {
-					return b.entry ? 1 : -1;
-				} else if (a.id.includes("vendor")) {
-					return -1;
-				} else if (b.id.includes("vendor")) {
-					return 1;
-				} else {
-					return b.id - a.id;
-				}
-			}
-		}),
-        new webpack.NamedChunksPlugin(),
-        new webpack.NamedModulesPlugin(),
-        new NameAllModulesPlugin(),
-		// Extract all node modules so that this chunk is not affected when we change our code
-		// help in caching
-		new webpack.optimize.CommonsChunkPlugin({
-			names : ["vendor"],
-			minChunks: function(module) {
-				return isExternal(module);
-			}
-		}),
-		// Extract all common thing in our code
-		new webpack.optimize.CommonsChunkPlugin({
-			names : ["common"],
-			chunks : ["main"], // Specify our chunk name to search for common modules
-			minChunks : function (module, count) {
-				return !isExternal(module) && count > 1;
-			}
-		}),
-		// Extract webpack runtime code
-		new webpack.optimize.CommonsChunkPlugin({
-			names : ["runtime"],
-			minChunks: Infinity
-		}),
-        new webpack.ProvidePlugin({
-        $: "jquery",
-        jQuery: "jquery"
-      }),
-        new webpack.DefinePlugin({
-            'process.env.API_URL': JSON.stringify(process.env.API_URL)
-        }),
-        new UglifyJsPlugin({
-            // sourceMap : true,
-            cache : true
-        })
-    ],
-    // we don't need dev-server, of course
-    //devServer: {
-    //   publicPath : '/',
-    //  host: 'localhost', // combine with port, will server your app through localhost:8080
-    //  port: 8080,
-    // historyApiFallback: true
-    //}
-    
-}
-```
------
 #### npm script
 For running cli command easier, we could add some to npm script
 For example, in `package.json`
 ```
 "scripts" : {
-    "build": "webpack --config webpack.prod.config.js",
-    "build-dev" : "webpack-dev-server"
+  "build": "webpack --config webpack.prod.config.js",
+  "build-dev" : "webpack-dev-server"
 }
 ```
+-----
+#### Async component for react
+For the code to be interpreted correctly by webpack and babel, add the following babel plugins and config
+Install
+```
+npm install --save babel-plugin-syntax-dynamic-import
+```
+In `.babelrc`
+```
+plugins : ["syntax-dynamic-import"],
+comments : true
+```
+comments : true so that babel doesn't strip away comment like `/* webpackChunkName : foo */`
 
 ## Authors
 
