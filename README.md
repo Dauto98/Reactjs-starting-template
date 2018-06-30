@@ -7,7 +7,7 @@ This repo includes basic setup for Webpack to use in React project
 The guide will be divided in to small sections, each section will contain setup for 1 module or functionality.
 For final configuration, you can check the repo.
 
-(The code in the repo is for webpack 3 on branch master)
+(The code in the repo is for webpack 3 on branch master, the default branch here is webpack 4)
 
 ## Prerequisites
 
@@ -33,6 +33,7 @@ Nodejs
 13. [Minify js](#minify-js-files)
 14. [npm script](#npm-script)
 15. [Async component](#async-component-for-react)
+
 TODO:
 16.  Service worker
 17. Webpack PWA plugin
