@@ -225,8 +225,8 @@ Create `.babelrc` in your project root directory,  this is the babel configurati
 ```
 //.babelrc
 {
-  "presets": ["env", "react"],
-  "plugins": ["transform-object-rest-spread", "transform-class-properties"]
+  "presets": ["@babel/preset-env", "@babel/preset-react"],
+  "plugins": ["@babel/plugin-proposal-object-rest-spread", "@babel/plugin-proposal-class-properties"]
 }
 ```
 Add rule to `webpack.config.js` file
