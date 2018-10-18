@@ -212,7 +212,7 @@ module.exports = {
 Babel is used to transpile JSX and ES201x js code to older js standard for some old browser
 Install
 ```
-npm install --save babel-core babel-loader babel-preset-env babel-preset-react babel-plugin-transform-class-properties babel-plugin-transform-object-rest-spread
+npm install --save @babel/core babel-loader @babel/preset-env @babel/preset-react @babel/plugin-proposal-class-properties @babel/plugin-proposal-object-rest-spread
 ```
 - [babel-core](https://babeljs.io/docs/core-packages/): core dependency for babel
 - [babel-loader](https://github.com/babel/babel-loader): using babel with webpack
